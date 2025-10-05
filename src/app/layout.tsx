@@ -8,7 +8,7 @@ import { AnalysisProvider } from "../context/AnalysisContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Lazarus",
+  title: "Lazurus",
   description: "Discover worlds beyond our solar system",
 };
 

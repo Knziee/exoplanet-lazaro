@@ -13,10 +13,10 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
   const [infoContent, setInfoContent] = useState<ReactNode>(
     <>
       <h2 className="text-white font-inter font-semibold text-[18px] mb-2">
-        Team up with Lazaro to find exoplanets!
+        Team up with Lazurus to find exoplanets!
       </h2>
       <p className="text-white font-inter text-[16px] leading-relaxed">
-        Pick your star’s parameters, and Lazaro finds promising TESS candidates
+        Pick your star’s parameters, and Lazurus finds promising TESS candidates
         with up to 87% confidence. When a sound alerts you, just compare the
         graphs and share your opinion.
       </p>
@@ -30,9 +30,9 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
 
     switch (logId) {
       case "0":
-        title = "Team up with Lazaro to find exoplanets!";
+        title = "Team up with Lazurus to find exoplanets!";
         description =
-          "Pick your star’s parameters, and Lazaro finds promising TESS candidates with up to 87% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
+          "Pick your star’s parameters, and Lazurus finds promising TESS candidates with up to 87% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
         break;
 
       case "1":
@@ -44,7 +44,7 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
       case "2":
         title = "Finding a promising candidate...";
         description =
-          "Lazaro AI scans light curves data, looking for periodic dips that match planetary transits.";
+          "Lazurus AI scans light curves data, looking for periodic dips that match planetary transits.";
         visual = <LightCurveExample />;
         break;
 
@@ -66,9 +66,9 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
         break;
 
       default:
-        title = "Team up with Lazaro to find exoplanets!";
+        title = "Team up with Lazurus to find exoplanets!";
         description =
-          "Pick your star’s parameters, and Lazaro finds promising TESS candidates with up to 87% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
+          "Pick your star’s parameters, and Lazurus finds promising TESS candidates with up to 87% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
     }
 
     setInfoContent(
