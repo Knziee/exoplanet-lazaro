@@ -14,10 +14,7 @@ export default function CentralColumn({ setLogId }: CentralColumnProps) {
     if (searching) return;
 
     setSearching(true);
-    setTimeout(() => {
-      setSearching(false);
-      setLogId?.("4");
-    }, 6000);
+    setLogId && setLogId("1");
   };
 
   return (

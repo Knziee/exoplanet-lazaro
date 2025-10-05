@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import CenterColumn from "./CenterColumn";
 import LeftColumn from "./LeftColumn";
 import { SliderItem } from "./SliderItem";
@@ -8,7 +8,10 @@ import {
   DISTANCE_CATEGORIES,
   SIZE_CATEGORIES,
   STELLAR_CLASSES,
+  tessCandidateSystems,
 } from "@/utils/constants";
+import { useRouter } from "next/navigation";
+import { useCandidate } from "../../context/CandidateContext";
 
 // Get stellar class info by index
 function getStarInfoByIndex(index: number) {
@@ -55,7 +58,10 @@ export default function SearchPage() {
   const [sizeIndex, setSizeIndex] = useState(1); // Default to "Solar"
   const [searching, setSearching] = useState(false);
   const [searchLogId, setSearchLogId] = useState<string | null>("0");
-  console.log("SearchPagered", searchLogId);
+
+  const router = useRouter();
+  const { setSelectedCandidate } = useCandidate();
+
   // Get current stellar info
   const {
     color: tempColor,
@@ -113,9 +119,49 @@ export default function SearchPage() {
   const displayValueSize = useMemo(() => sizeRange, [sizeRange]);
   const displayValueDistance = useMemo(() => distanceRange, [distanceRange]);
 
+  useEffect(() => {
+    if (searchLogId === "1") {
+      let currentLog = 1;
+
+      const step = () => {
+        if (currentLog < 5) {
+          currentLog++;
+          setSearchLogId(currentLog.toString());
+          setTimeout(step, currentLog === 2 ? 10000 : 5000);
+        } else {
+          const randomIndex = Math.floor(
+            Math.random() * tessCandidateSystems.length
+          );
+          const selected = tessCandidateSystems[randomIndex];
+
+          // Salva no contexto
+          setSelectedCandidate(selected);
+          router.push("/candidate");
+        }
+      };
+
+      setTimeout(step, 2000); // inicia o mockup 5s depois
+      // const randomIndex = Math.floor(
+      //   Math.random() * tessCandidateSystems.length
+      // );
+      // const selected = tessCandidateSystems[randomIndex];
+
+      // // Salva no contexto
+      // setSelectedCandidate(selected);
+      // setTimeout(() => {
+      //   router.push("/candidate");
+      // }, 500);
+    }
+  }, [searchLogId, router]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex w-4/5">
+    <div className="min-h-screen flex flex-col items-center justify-center">
+      {" "}
+      <div className="w-full bg-black text-white text-center py-2 text-sm font-medium tracking-wide z-50 shadow-md">
+        ⚠️ This is a temporary demonstration. Data shown here is for
+        illustrative purposes only.
+      </div>
+      <div className="flex w-4/5 flex-1 items-center justify-center mt-4">
         {/* Left column */}
         <div className="flex-1 m-2 flex justify-center">
           <LeftColumn logId={searchLogId} setLogId={setSearchLogId} />

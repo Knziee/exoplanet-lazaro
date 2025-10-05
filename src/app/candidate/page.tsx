@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { InfoPanel } from "@/components/InfoPanel";
-import { StellarSystemVisualization } from "../../components/StellarSystemVisualization";
+import { StellarSystemVisualization } from "@/components/StellarSystemVisualization"; // ajuste o caminho se necessário
 import {
   LineChart,
   Line,
@@ -10,45 +12,55 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useCandidate } from "../../context/CandidateContext";
 
-// Mock data
-const mockCandidate = {
-  type: "Exoplanet",
-  systemName: "Kepler-186",
-  starName: "Kepler-186",
-  starSize: "0.48 R☉ (Red Dwarf)",
-  distance: "582 light-years",
-  temperature: "3788 K",
-  discoveryDate: "2014-04-17",
-  aiProbability: "87%",
-  temperatureK: 3788,
-  sizeRSun: 0.48,
-  distanceLy: 582,
-};
-
-function generateLightCurveData() {
-  const data = [];
-  for (let i = 0; i <= 100; i++) {
-    const time = i;
-    let flux = 1.0;
-    if (time >= 45 && time <= 55) {
-      const center = 50;
-      const depth = 0.0042;
-      const width = 4;
-      flux =
-        1.0 -
-        depth * Math.exp(-Math.pow(time - center, 2) / (2 * width * width));
-    }
-    flux += (Math.random() - 0.5) * 0.0005;
-    data.push({ time, flux: parseFloat(flux.toFixed(5)) });
-  }
-  return data;
+function smoothLightCurveData(
+  time: number[],
+  flux: number[]
+): { time: number; flux: number }[] {
+  return time.map((t, i) => ({
+    time: parseFloat(t.toFixed(3)),
+    flux: parseFloat(flux[i].toFixed(5)),
+  }));
 }
 
-const lightCurveData = generateLightCurveData();
-
 export default function CandidatePage() {
-  const { type } = mockCandidate;
+  const { selectedCandidate } = useCandidate();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!selectedCandidate) {
+      router.push("/");
+    }
+  }, [selectedCandidate, router]);
+
+  if (!selectedCandidate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading candidate...
+      </div>
+    );
+  }
+
+  const {
+    name: systemName,
+    starName,
+    stellarType,
+    stellarRadiusSolar,
+    stellarTemperatureK,
+    distanceLightYears,
+    aiConfidencePercent,
+    lightCurveData,
+    notes,
+  } = selectedCandidate;
+
+  const chartData = smoothLightCurveData(
+    lightCurveData.time,
+    lightCurveData.flux
+  );
+
+  const minFlux = Math.min(...lightCurveData.flux);
+  const transitDepthPercent = ((1 - minFlux) * 100).toFixed(2);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start pt-12 px-6">
@@ -56,11 +68,8 @@ export default function CandidatePage() {
       <h1 className="text-[#47EAE9] font-bold text-3xl mb-2">
         DISCOVERY ALERT
       </h1>
-      <h2 className="text-white font-bold text-2xl mb-8">
-        {type.toUpperCase()}
-      </h2>
+      <h2 className="text-white font-bold text-2xl mb-8">EXOPLANET</h2>
 
-      {/* Main Info Panel (900x350) */}
       <InfoPanel width={900} height={350}>
         <div className="flex h-full">
           <div className="w-1/2 p-6 flex flex-col">
@@ -70,11 +79,11 @@ export default function CandidatePage() {
             <div className="flex-1 bg-gray-900/50 border border-white/20 rounded-xl">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
-                  data={lightCurveData}
+                  data={chartData}
                   margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
                 >
                   <XAxis hide domain={["dataMin", "dataMax"]} />
-                  <YAxis hide domain={[0.994, 1.002]} />
+                  <YAxis hide domain={["auto", "auto"]} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#111827",
@@ -86,14 +95,14 @@ export default function CandidatePage() {
                       `${parseFloat(value).toFixed(5)}`,
                       "Flux",
                     ]}
-                    labelFormatter={() => "Time"}
+                    labelFormatter={() => "Time (days)"}
                   />
                   <Line
-                    type="natural" 
+                    type="natural"
                     dataKey="flux"
                     stroke="#47EAE9"
                     strokeWidth={2}
-                    dot={false} 
+                    dot={false}
                     activeDot={{ r: 4, fill: "#47EAE9" }}
                     isAnimationActive={false}
                   />
@@ -104,18 +113,21 @@ export default function CandidatePage() {
 
           {/* Right: Key Data */}
           <div className="w-1/2 p-6 flex flex-col justify-center text-white">
-            <DataItem label="System Name" value={mockCandidate.systemName} />
-            <DataItem label="Star Name" value={mockCandidate.starName} />
-            <DataItem label="Star Size" value={mockCandidate.starSize} />
-            <DataItem label="Distance" value={mockCandidate.distance} />
-            <DataItem label="Temperature" value={mockCandidate.temperature} />
+            <DataItem label="System Name" value={systemName} />
+            <DataItem label="Star Name" value={starName} />
             <DataItem
-              label="Discovery Date"
-              value={mockCandidate.discoveryDate}
+              label="Star Type"
+              value={`${stellarType} (${stellarRadiusSolar.toFixed(2)} R☉)`}
             />
             <DataItem
+              label="Distance"
+              value={`${distanceLightYears.toFixed(0)} light-years`}
+            />
+            <DataItem label="Temperature" value={`${stellarTemperatureK} K`} />
+            <DataItem label="Transit Depth" value={`${transitDepthPercent}%`} />
+            <DataItem
               label="AI Detection Confidence"
-              value={mockCandidate.aiProbability}
+              value={`${aiConfidencePercent.toFixed(1)}%`}
             />
           </div>
         </div>
@@ -130,17 +142,23 @@ export default function CandidatePage() {
           <div className="flex-1 px-6 pb-4">
             <div className="h-full bg-gray-900/50 border border-white/20 rounded-xl">
               <StellarSystemVisualization
-                temperatureK={mockCandidate.temperatureK}
-                sizeRSun={mockCandidate.sizeRSun}
-                distanceLy={mockCandidate.distanceLy}
+                temperatureK={stellarTemperatureK}
+                sizeRSun={stellarRadiusSolar}
+                distanceLy={distanceLightYears}
               />
             </div>
           </div>
           <div className="px-6 pb-6 flex justify-end gap-4">
-            <button className="px-6 py-2 bg-[#47EAE9] text-black font-bold rounded-full hover:bg-[#30d0c9] transition">
+            <button
+              className="cursor-pointer px-6 py-2 bg-[#47EAE9] text-black font-bold rounded-full hover:bg-[#30d0c9] transition"
+              onClick={() => router.push("/analysis")}
+            >
               Investigate
             </button>
-            <button className="px-6 py-2 bg-white/10 text-white font-bold rounded-full border border-white/30 hover:bg-white/20 transition">
+            <button
+              className="cursor-pointer px-6 py-2 bg-white/10 text-white font-bold rounded-full border border-white/30 hover:bg-white/20 transition"
+              onClick={() => router.push("/")}
+            >
               Ignore
             </button>
           </div>

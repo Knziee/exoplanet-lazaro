@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { InfoPanel } from "@/components/InfoPanel";
 import { FiChevronRight } from "react-icons/fi";
 import {
@@ -11,6 +12,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useCandidate } from "@/context/CandidateContext";
+import { useAnalysis } from "@/context/AnalysisContext";
 
 const QUESTIONS = [
   {
@@ -41,46 +44,63 @@ const QUESTIONS = [
   },
 ];
 
-function generateLightCurveData(questionId: number) {
-  const data = [];
-  const totalPoints = 120;
-
-  for (let i = 0; i < totalPoints; i++) {
-    const time = i;
-    let flux = 1.0;
-
-    if (questionId === 0 || questionId === 1 || questionId === 2) {
-      if ((time >= 30 && time <= 35) || (time >= 70 && time <= 75)) {
-        const depth = time >= 70 ? 0.0035 : 0.0042; 
-        flux = 1.0 - depth;
-      }
-    } else if (questionId === 3) {
-      if (time >= 50 && time <= 55) {
-        flux = 1.0 - 0.004;
-      }
-    }
-
-    flux += (Math.random() - 0.5) * 0.0006;
-    data.push({ time, flux: parseFloat(flux.toFixed(5)) });
+function extractCurveSegment(
+  time: number[],
+  flux: number[],
+  questionId: number
+) {
+  if (!time || !flux || time.length === 0) {
+    return Array.from({ length: 120 }, (_, i) => ({
+      time: i,
+      flux: 1.0 + (Math.random() - 0.5) * 0.0005,
+    }));
   }
-  return data;
+  return Array.from({ length }, (_, i) => ({
+    time: time[i],
+    flux: flux[i] ?? 1.0,
+  }));
 }
 
 export default function LightCurveQuestionsPage() {
+  const { selectedCandidate } = useCandidate();
+  const { answers, setAnswer, resetAnswers } = useAnalysis();
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<(string | null)[]>(
-    Array(QUESTIONS.length).fill(null)
-  );
+  const router = useRouter();
 
-  const chartData = useMemo(
-    () => generateLightCurveData(currentQuestion),
-    [currentQuestion]
-  );
+  useEffect(() => {
+    resetAnswers();
+    setCurrentQuestion(0);
+  }, []);
+
+  const chartData = useMemo(() => {
+    if (!selectedCandidate) {
+      return Array.from({ length: 120 }, (_, i) => ({
+        time: i,
+        flux: 1.0 + (Math.random() - 0.5) * 0.0005,
+      }));
+    }
+
+    const { time, flux } = selectedCandidate.lightCurveData;
+
+    if (!time || !flux || time.length === 0) {
+      return [];
+    }
+
+    return time.map((t, i) => ({
+      time: t,
+      flux: flux[i] ?? 1.0,
+    }));
+  }, [selectedCandidate]); 
+  if (!selectedCandidate) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-white">
+        Loading...
+      </div>
+    );
+  }
 
   const handleAnswer = (answer: string) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQuestion] = answer;
-    setAnswers(newAnswers);
+    setAnswer(currentQuestion, answer);
   };
 
   const canAdvance = answers[currentQuestion] !== null;
@@ -88,7 +108,7 @@ export default function LightCurveQuestionsPage() {
 
   const nextStep = () => {
     if (isLastQuestion) {
-      // TODO: redirecionar para resumo
+      router.push("/summary");
     } else {
       setCurrentQuestion(currentQuestion + 1);
     }
@@ -137,7 +157,7 @@ export default function LightCurveQuestionsPage() {
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold ${
                     canAdvance
                       ? "bg-[#47EAE9] text-[#020305] hover:bg-[#30d0c9] cursor-pointer"
-                      : "bg-white/10 text-white/50 cursor-not-allowed cursor-pointer"
+                      : "bg-white/10 text-white/50 cursor-pointer"
                   }`}
                 >
                   {isLastQuestion ? "Conclude" : "Next"}

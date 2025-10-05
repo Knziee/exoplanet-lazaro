@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, ReactNode } from "react";
 import { LightCurveExample } from "@/components/LightCurveExample";
+import { LightCurve } from "@/components/LightCurveTutorial";
 
 interface LeftColumnProps {
   logId?: string | null;
@@ -71,15 +72,31 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
     }
 
     setInfoContent(
-      <>
-        <h2 className="text-white font-inter font-semibold text-[18px] mb-2">
-          {title}
-        </h2>
-        <p className="text-white font-inter text-[16px] leading-relaxed">
-          {description}
-        </p>
-        {visual && <div className="mt-4">{visual}</div>}
-      </>
+      <div className="w-full flex flex-col items-center">
+        {logId === "2" ? (
+          <div className="flex flex-col items-center w-full ">
+            <h2 className="text-white font-inter font-semibold text-[18px] mb-1">
+              {title}
+            </h2>
+            <p className="text-white font-inter text-[14px] mb-8 text-center">
+              {description}
+            </p>
+            <div className="w-full h-[200px] flex justify-center items-center">
+              {visual} <LightCurve transitDepth={0.188} periodSeconds={5} />
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center w-full">
+            <h2 className="text-white font-inter font-semibold text-[18px] mb-2">
+              {title}
+            </h2>
+            <p className="text-white font-inter text-[16px] leading-relaxed mb-4 text-center">
+              {description}
+            </p>
+            {visual && <div className="mt-4">{visual}</div>}
+          </div>
+        )}
+      </div>
     );
   }, [logId]);
 
