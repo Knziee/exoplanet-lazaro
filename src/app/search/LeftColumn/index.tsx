@@ -17,7 +17,7 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
       </h2>
       <p className="text-white font-inter text-[16px] leading-relaxed">
         Pick your star’s parameters, and Lazurus finds promising TESS candidates
-        with up to 87% confidence. When a sound alerts you, just compare the
+        with up to --% confidence. When a sound alerts you, just compare the
         graphs and share your opinion.
       </p>
     </>
@@ -32,7 +32,7 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
       case "0":
         title = "Team up with Lazurus to find exoplanets!";
         description =
-          "Pick your star’s parameters, and Lazurus finds promising TESS candidates with up to 87% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
+          "Pick your star’s parameters, and Lazurus finds promising TESS candidates with up to --% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
         break;
 
       case "1":
@@ -68,7 +68,7 @@ export default function LeftColumn({ logId = null }: LeftColumnProps) {
       default:
         title = "Team up with Lazurus to find exoplanets!";
         description =
-          "Pick your star’s parameters, and Lazurus finds promising TESS candidates with up to 87% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
+          "Pick your star’s parameters, and Lazurus finds promising TESS candidates with up to --% confidence. When a sound alerts you, just compare the graphs and share your opinion.";
     }
 
     setInfoContent(

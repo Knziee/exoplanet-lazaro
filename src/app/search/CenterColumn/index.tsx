@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { FiSearch } from "react-icons/fi"; // search icon
+import { FiSearch } from "react-icons/fi";
 
 interface CentralColumnProps {
   setLogId?: (id: string | null) => void;
@@ -19,7 +19,6 @@ export default function CentralColumn({ setLogId }: CentralColumnProps) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-12">
-      {/* TESS image */}
       <div className="mt-32 animate-float">
         <Image
           src="/tess.svg"
@@ -27,10 +26,9 @@ export default function CentralColumn({ setLogId }: CentralColumnProps) {
           width={380}
           height={380}
           className="object-contain"
-        />{" "}
+        />
       </div>
 
-      {/* Fixed Search button at the bottom */}
       <div className="w-full flex justify-center mt-auto mb-4">
         <button
           onClick={handleSearch}
